@@ -1,17 +1,19 @@
 #include "Gyro.h"
-
+#include <frc/smartdashboard/SmartDashboard.h>
 
 Gyro::Gyro() :
-    m_gyro(0)
+    m_pigeon(2)
 {
 
 }
 
 double Gyro::GetHeading()
 {
-    auto retVal = std::remainder(m_gyro.GetFusedHeading(), 360.0);
+    auto retVal = std::remainder(m_pigeon.GetYaw(), 360.0);
+    frc::SmartDashboard::PutNumber("GetAbsoluteCompassHeading", retVal);
     if (retVal > 180.0)
         retVal -= 360.0;
+    frc::SmartDashboard::PutNumber("retVal", retVal);
 
     return retVal;
 }
@@ -29,7 +31,7 @@ int err;
 // printf("heading to set: %f  ", heading);  
 for (int n=0; n<100; n++)
     {
-    err = m_gyro.SetFusedHeading(heading, 30);
+    err = m_pigeon.SetYaw(heading, 30);
     if (err)
         printf("SetFusedHeading() failed with error code: %d  ", err); 
     else if(fabs(GetHeading() - heading) < 0.1)  // *** Check needed becuase SetFusedHeading() observed to faile yet still return 0! ***
@@ -44,6 +46,6 @@ for (int n=0; n<100; n++)
 double Gyro::GetTurnRate()
 {
     double turnRates [3] = {0, 0, 0};
-    m_gyro.GetRawGyro(turnRates);
+    m_pigeon.GetRawGyro(turnRates);
     return turnRates[2]; 
 }

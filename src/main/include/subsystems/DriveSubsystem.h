@@ -8,7 +8,7 @@
 #include <units/length.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 
-//#include "Gyro.h"
+#include "Gyro.h"
 
 using namespace ctre::phoenix::motorcontrol;
 using namespace ctre::phoenix::motorcontrol::can;
@@ -38,7 +38,7 @@ private:
     frc::DifferentialDrive m_drive;
 
     frc::DifferentialDriveOdometry m_odometry;
-    //Gyro m_gyro;
+    Gyro m_gyro;
     double m_ticksPerInch = 286.479; //5400 ticks per rev divided by 6 pi (circumfrence of 6.0_in diameter wheels)
     units::inch_t m_trackWidth = 21.0_in; //track width from middle of wheels
 };

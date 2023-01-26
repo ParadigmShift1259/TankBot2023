@@ -28,6 +28,12 @@ public:
     /// Returns the turn rate of the robot.
     /// \return The turn rate of the robot, in degrees per second
     double GetTurnRate();
+    
+    ctre::phoenix::ErrorCode GetYawPitchRoll(double ypr[3]) const 
+    {
+        return m_pigeon.GetYawPitchRoll(ypr);
+    }
 
-    PigeonIMU m_gyro;
+protected:
+    Pigeon2 m_pigeon;
 };
