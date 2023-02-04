@@ -22,9 +22,13 @@ public:
     void Periodic();
     frc::Pose2d GetPose();
     void SetWheelSpeeds(units::meters_per_second_t leftSpeed, units::meters_per_second_t rightSpeed);
-    frc::DifferentialDriveKinematics kDriveKinematics{m_trackWidth};
+    double GetPitch() { return m_gyro.GetPitch(); }
+
+    const frc::DifferentialDriveKinematics& GetDriveKinematics() const { return kDriveKinematics; }
 
 private:
+    frc::DifferentialDriveKinematics kDriveKinematics{m_trackWidth};
+
     WPI_TalonFX m_leftLeader{1};
     WPI_TalonFX m_leftFollowerA{2};
     WPI_TalonFX m_leftFollowerB{3};

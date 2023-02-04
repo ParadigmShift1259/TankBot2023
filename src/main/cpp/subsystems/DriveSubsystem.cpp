@@ -9,11 +9,21 @@ DriveSubsystem::DriveSubsystem()
     , m_gyro()
 {
     m_rightmcgroup.SetInverted(true);
+    m_leftLeader.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+    m_leftFollowerA.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+    m_leftFollowerB.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+    m_rightLeader.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+    m_rightFollowerA.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
+    m_rightFollowerB.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
 }
 
 
 void DriveSubsystem::Drive(double xSpeed, double zRotation, bool squareInputs /*= true*/)
 {
+    if (xSpeed > 0.1)
+    {
+        printf("Drive at %.3f\n", xSpeed);
+    }
     m_drive.ArcadeDrive(xSpeed, zRotation, squareInputs);
 }
 
