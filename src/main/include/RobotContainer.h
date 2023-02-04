@@ -12,6 +12,7 @@
 #include <frc2/command/InstantCommand.h>
 #include <frc2/command/SequentialCommandGroup.h>
 #include <frc2/command/RunCommand.h>
+#include <frc2/command/ConditionalCommand.h>
 #include <vector>
 
 #include "commands/ExampleCommand.h"
@@ -29,10 +30,12 @@ class RobotContainer {
  public:
   RobotContainer();
 
+  void Periodic();
   frc2::Command* GetAutonomousCommand();
   frc2::SequentialCommandGroup* GetCommandGroup();
   frc2::RamseteCommand GetCommandPath();
-  frc2::SequentialCommandGroup* GetParkAndBalanceCommand();
+  frc2::SequentialCommandGroup* GetParkCommand();
+  frc2::ConditionalCommand* GetParkAndBalanceCommand();
 
  private:
   // The robot's subsystems and commands are defined here...
@@ -41,8 +44,10 @@ class RobotContainer {
   frc2::Command* m_autonomousCommand = nullptr;
   frc::Trajectory m_trajectory;
   frc::RamseteController m_ramseteController;
-  bool m_bRunningPark = false;
-  frc2::InstantCommand m_driveFwd{[this] { m_drive.Drive(0.25, 0.0); }, {&m_drive}};
+  bool m_balance = false;
+  frc2::InstantCommand m_setBalanceOn = {[this]() { m_balance = true; }, {}};
+  frc2::InstantCommand m_setBalanceOff = {[this]() { m_balance = false; }, {}};
+
 
   frc::XboxController m_primaryController{0};
 

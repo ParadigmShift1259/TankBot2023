@@ -8,6 +8,7 @@
 #include <frc2/command/ParallelDeadlineGroup.h>
 #include <frc2/command/WaitCommand.h>
 #include <frc2/command/WaitUntilCommand.h>
+#include <frc2/command/ScheduleCommand.h>
 //#include <frc2/command/RunCommand.h>
 #include <frc2/command/button/JoystickButton.h>
 
@@ -31,6 +32,15 @@ RobotContainer::RobotContainer()
   ConfigureButtonBindings();
 }
 
+void RobotContainer::Periodic()
+{
+  if (m_balance)
+  {
+    //printf("Scheduling GetParkAndBalanceCommand\n");
+    frc2::ScheduleCommand((frc2::Command*)GetParkAndBalanceCommand());
+  }
+}
+
 void RobotContainer::ConfigureButtonBindings()
 {
   using namespace frc;
@@ -51,9 +61,10 @@ void RobotContainer::ConfigureButtonBindings()
   ));
 
   auto& primary = m_primaryController;
-  JoystickButton(&primary, xbox::kB).OnTrue(GetParkAndBalanceCommand());
-//  JoystickButton(&primary, xbox::kB).WhileTrue(&m_driveFwd);
-//  JoystickButton(&primary, xbox::kB).WhileTrue(frc2::cmd::Run([this]() { m_drive.Drive(0.25, 0.0, false); }, {&m_drive}));
+  JoystickButton(&primary, xbox::kB).OnTrue(GetParkCommand());
+//  JoystickButton(&primary, xbox::kY).WhileTrue(&m_setBalanceOn);
+//  JoystickButton(&primary, xbox::kY).WhileFalse(&m_setBalanceOff);
+  JoystickButton(&primary, xbox::kY).WhileTrue(GetParkAndBalanceCommand());
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
@@ -81,13 +92,10 @@ frc2::RamseteCommand RobotContainer::GetCommandPath() {
   return ramseteCommand;
 }
 
-frc2::SequentialCommandGroup* RobotContainer::GetParkAndBalanceCommand()
+frc2::SequentialCommandGroup* RobotContainer::GetParkCommand()
 {
     return new frc2::SequentialCommandGroup
     (
-      //frc2::InstantCommand([this]() { m_bRunningPark = true; }, {})
-//, frc2::RunCommand([this]() { m_drive.SetWheelSpeeds(0.25_mps, 0.25_mps); }, {&m_drive})
-//, frc2::RunCommand([this]() { m_drive.Drive(0.25, 0.0, false); }, {&m_drive})
         frc2::ParallelDeadlineGroup
         (
               frc2::WaitUntilCommand([this]() { return m_drive.GetPitch() < -7.0; })
@@ -99,6 +107,22 @@ frc2::SequentialCommandGroup* RobotContainer::GetParkAndBalanceCommand()
           , frc2::RunCommand([this]() { m_drive.Drive(0.19, 0.0, false); }, {&m_drive})
         )
         , frc2::InstantCommand([this]() { m_drive.Drive(0.0, 0.0, false); }, {&m_drive})
-        //, frc2::InstantCommand([this]() { m_bRunningPark = false; }, {})
+    );
+}
+
+frc2::ConditionalCommand* RobotContainer::GetParkAndBalanceCommand()
+{
+    return new frc2::ConditionalCommand
+    (
+        frc2::RunCommand([this]() { printf("stopping\n"); m_drive.Drive(0.0, 0.0, false); }, {&m_drive})    // Cmd if true
+      , frc2::RunCommand([this]()                                                     // Cmd if false
+        { 
+          //double driveSpeed = m_drive.GetPitch() < 0.0 ? 0.1 : -0.1;
+          double driveSpeed = std::clamp(-0.0125 * m_drive.GetPitch(), -0.1, 0.1);
+          printf("driving %.3f\n", driveSpeed); 
+          m_drive.Drive(driveSpeed, 0.0, false); 
+        }
+        , {&m_drive})
+      , [this]() { bool b = m_drive.GetPitch() > -1.0 && m_drive.GetPitch() < 1.0; printf("balanced %d %.3f\n", b, m_drive.GetPitch()); return b; }    // Condition
     );
 }

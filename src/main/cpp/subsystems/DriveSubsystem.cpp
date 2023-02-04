@@ -20,10 +20,10 @@ DriveSubsystem::DriveSubsystem()
 
 void DriveSubsystem::Drive(double xSpeed, double zRotation, bool squareInputs /*= true*/)
 {
-    if (xSpeed > 0.1)
-    {
-        printf("Drive at %.3f\n", xSpeed);
-    }
+    // if (xSpeed > 0.1)
+    // {
+    //     printf("Drive at %.3f\n", xSpeed);
+    // }
     m_drive.ArcadeDrive(xSpeed, zRotation, squareInputs);
 }
 

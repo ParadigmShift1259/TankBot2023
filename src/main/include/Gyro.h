@@ -20,13 +20,14 @@ public:
     double GetHeading();
     frc::Rotation2d GetHeadingAsRot2d() { return frc::Rotation2d(degree_t(GetHeading())); }
     double GetPitch() { 
-        auto pitch = m_pigeon.GetPitch();
-        if (pitch > 0.5)
-        {
-            printf("Pitch %.3f degrees\n", pitch);
-        }
+        // auto pitch = m_pigeon.GetPitch();
+        // if (pitch > 0.5)
+        // {
+        //     printf("Pitch %.3f degrees\n", pitch);
+        // }
 
-        return pitch; //m_pigeon.GetPitch();
+        // return pitch;
+            return m_pigeon.GetPitch();
          }
 
     /// Zeroes the heading of the robot.
