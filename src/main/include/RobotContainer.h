@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <frc/filter/SlewRateLimiter.h>
+
 #include <frc2/command/Command.h>
 #include <frc2/command/RamseteCommand.h>
 #include <frc/trajectory/Trajectory.h>
@@ -26,7 +28,8 @@
  * scheduler calls).  Instead, the structure of the robot (including subsystems,
  * commands, and button mappings) should be declared here.
  */
-class RobotContainer {
+class RobotContainer
+{
  public:
   RobotContainer();
 
@@ -44,12 +47,10 @@ class RobotContainer {
   frc2::Command* m_autonomousCommand = nullptr;
   frc::Trajectory m_trajectory;
   frc::RamseteController m_ramseteController;
-  bool m_balance = false;
-  frc2::InstantCommand m_setBalanceOn = {[this]() { m_balance = true; }, {}};
-  frc2::InstantCommand m_setBalanceOff = {[this]() { m_balance = false; }, {}};
-
 
   frc::XboxController m_primaryController{0};
+  frc::SlewRateLimiter<units::scalar> m_xspeedLimiter{3 / 1_s};
+  frc::SlewRateLimiter<units::scalar> m_rotLimiter{3 / 1_s};
 
   void ConfigureButtonBindings();
 };

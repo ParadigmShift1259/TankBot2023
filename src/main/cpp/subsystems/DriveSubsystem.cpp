@@ -1,5 +1,7 @@
 #include "subsystems/DriveSubsystem.h"
+
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/DataLogManager.h>
 
 DriveSubsystem::DriveSubsystem()
     : m_leftmcgroup(m_leftLeader, m_leftFollowerA, m_leftFollowerB)
@@ -8,6 +10,14 @@ DriveSubsystem::DriveSubsystem()
     , m_odometry(frc::Rotation2d(), 0_m, 0_m)
     , m_gyro()
 {
+    wpi::log::DataLog& log = frc::DataLogManager::GetLog();
+    m_logRobotPoseX = wpi::log::DoubleLogEntry(log, "/odometry/robotPoseX");
+    m_logRobotPoseY = wpi::log::DoubleLogEntry(log, "/odometry/robotPoseY");
+    m_logRobotPoseTheta = wpi::log::DoubleLogEntry(log, "/odometry/robotPoseTheta");   
+    //m_logRobotSpeed = wpi::log::DoubleLogEntry(log, "/odometry/robotSpeed");
+    //m_logRobotAccel = wpi::log::DoubleLogEntry(log, "/odometry/robotAccel");
+    m_logGyroPitch = wpi::log::DoubleLogEntry(log, "/gyro/pitch");
+
     m_rightmcgroup.SetInverted(true);
     m_leftLeader.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
     m_leftFollowerA.SetNeutralMode(ctre::phoenix::motorcontrol::Brake);
@@ -31,6 +41,17 @@ void DriveSubsystem::Periodic() {
     m_odometry.Update(m_gyro.GetHeadingAsRot2d()
                      , units::inch_t(m_leftLeader.GetSelectedSensorPosition(0) / m_ticksPerInch)
                      , units::inch_t(m_rightLeader.GetSelectedSensorPosition(0) / m_ticksPerInch));
+
+  //Log Odometry Values
+  frc::Pose2d pose = m_odometry.GetPose();
+  m_logRobotPoseX.Append(pose.X().to<double>());
+  m_logRobotPoseY.Append(pose.Y().to<double>());
+  m_logRobotPoseTheta.Append(pose.Rotation().Degrees().to<double>());
+  //m_logRobotSpeed.Append(m_velocity);
+  //m_logRobotAccel.Append(m_acceleration);
+  frc::SmartDashboard::PutNumber("GyroPitch", m_gyro.GetPitch());
+  m_logGyroPitch.Append(m_gyro.GetPitch()); 
+
 
     double ypr[3];
     ctre::phoenix::ErrorCode e = m_gyro.GetYawPitchRoll(ypr);

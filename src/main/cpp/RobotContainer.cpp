@@ -4,15 +4,14 @@
 
 #include "RobotContainer.h"
 
+#include <frc/MathUtil.h> // For ApplyDeadband
+
 #include <frc2/command/Commands.h>
 #include <frc2/command/ParallelDeadlineGroup.h>
 #include <frc2/command/WaitCommand.h>
 #include <frc2/command/WaitUntilCommand.h>
 #include <frc2/command/ScheduleCommand.h>
-//#include <frc2/command/RunCommand.h>
 #include <frc2/command/button/JoystickButton.h>
-
-#include <utility>  // For RunOnce
 
 RobotContainer::RobotContainer() 
 {
@@ -34,11 +33,6 @@ RobotContainer::RobotContainer()
 
 void RobotContainer::Periodic()
 {
-  if (m_balance)
-  {
-    //printf("Scheduling GetParkAndBalanceCommand\n");
-    frc2::ScheduleCommand((frc2::Command*)GetParkAndBalanceCommand());
-  }
 }
 
 void RobotContainer::ConfigureButtonBindings()
@@ -49,13 +43,14 @@ void RobotContainer::ConfigureButtonBindings()
 
   m_drive.SetDefaultCommand(RunCommand(
     [this] {
-      auto xInput = m_primaryController.GetLeftY() * -1.0;
-      auto yInput = m_primaryController.GetLeftX() * -1.0;
+      const double kDeadband = 0.1;
+      const auto xInput = ApplyDeadband(m_primaryController.GetLeftY() * -1.0, kDeadband);
+      const auto rotInput = ApplyDeadband(m_primaryController.GetLeftX() * -1.0, kDeadband);
 
-      //if (!m_bRunningPark)
-      {
-        m_drive.Drive(xInput, yInput);
-      }
+      const auto xSpeed = m_xspeedLimiter.Calculate(xInput);
+      const auto rotSpeed = m_rotLimiter.Calculate(rotInput);
+
+      m_drive.Drive(xSpeed, rotSpeed);
     },
     {&m_drive}
   ));

@@ -1,12 +1,16 @@
-#include <frc2/command/SubsystemBase.h>
+#include <wpi/DataLog.h>
+#include <units/length.h>
+
 #include <frc/drive/DifferentialDrive.h>
-#include <ctre/phoenix/motorcontrol/can/TalonFX.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
-#include <ctre/Phoenix.h>
 #include <frc/geometry/Pose2d.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
-#include <units/length.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
+
+#include <frc2/command/SubsystemBase.h>
+
+#include <ctre/phoenix/motorcontrol/can/TalonFX.h>
+#include <ctre/Phoenix.h>
 
 #include "Gyro.h"
 
@@ -45,4 +49,11 @@ private:
     Gyro m_gyro;
     double m_ticksPerInch = 286.479; //5400 ticks per rev divided by 6 pi (circumfrence of 6.0_in diameter wheels)
     units::inch_t m_trackWidth = 21.0_in; //track width from middle of wheels
+
+  wpi::log::DoubleLogEntry m_logRobotPoseX;
+  wpi::log::DoubleLogEntry m_logRobotPoseY;
+  wpi::log::DoubleLogEntry m_logRobotPoseTheta;
+  //wpi::log::DoubleLogEntry m_logRobotSpeed;
+  //wpi::log::DoubleLogEntry m_logRobotAccel;
+  wpi::log::DoubleLogEntry m_logGyroPitch;
 };

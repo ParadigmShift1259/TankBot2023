@@ -7,7 +7,13 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/CommandScheduler.h>
 
-void Robot::RobotInit() {}
+wpi::log::DoubleLogEntry logMatchTime;
+
+void Robot::RobotInit()
+{
+  wpi::log::DataLog& log = frc::DataLogManager::GetLog();
+  logMatchTime = wpi::log::DoubleLogEntry(log, "/robot/matchTime");
+}
 
 /**
  * This function is called every 20 ms, no matter the mode. Use
@@ -36,7 +42,13 @@ void Robot::DisabledPeriodic() {}
  * This autonomous runs the autonomous command selected by your {@link
  * RobotContainer} class.
  */
-void Robot::AutonomousInit() {
+void Robot::AutonomousInit() 
+{
+  frc::DataLogManager::LogNetworkTables(false);
+  frc::DataLogManager::Start();
+  // Record both DS control and joystick data
+  frc::DriverStation::StartDataLog(frc::DataLogManager::GetLog());
+
   m_autonomousCommand = m_container.GetAutonomousCommand();
 
   if (m_autonomousCommand != nullptr) {
@@ -46,7 +58,13 @@ void Robot::AutonomousInit() {
 
 void Robot::AutonomousPeriodic() {}
 
-void Robot::TeleopInit() {
+void Robot::TeleopInit()
+{
+  if (m_hasAutoRun == false)
+  {
+    frc::DataLogManager::Start();
+  }
+
   // This makes sure that the autonomous stops running when
   // teleop starts running. If you want the autonomous to
   // continue until interrupted by another command, remove
@@ -78,7 +96,8 @@ void Robot::SimulationInit() {}
 void Robot::SimulationPeriodic() {}
 
 #ifndef RUNNING_FRC_TESTS
-int main() {
+int main()
+{
   return frc::StartRobot<Robot>();
 }
 #endif
