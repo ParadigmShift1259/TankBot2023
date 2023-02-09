@@ -41,6 +41,8 @@ class RobotContainer
   frc2::ConditionalCommand* GetParkAndBalanceCommand();
 
  private:
+  void ConfigureButtonBindings();
+
   // The robot's subsystems and commands are defined here...
   DriveSubsystem m_drive;
   ExampleSubsystem m_Subsystem;
@@ -52,5 +54,11 @@ class RobotContainer
   frc::SlewRateLimiter<units::scalar> m_xspeedLimiter{3 / 1_s};
   frc::SlewRateLimiter<units::scalar> m_rotLimiter{3 / 1_s};
 
-  void ConfigureButtonBindings();
+  // No weight
+  //double m_pitchFactor = -0.0125;
+  //double m_MaxAutoBalanceSpeed = 0.1;
+
+  // About 108 lbs
+  double m_pitchFactor = -0.0125;
+  double m_maxAutoBalanceSpeed = 0.2;
 };
