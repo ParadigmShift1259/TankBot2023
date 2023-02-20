@@ -41,6 +41,8 @@ class RobotContainer
   frc2::ConditionalCommand* GetParkAndBalanceCommand();
 
  private:
+  void ConfigureButtonBindings();
+
   // The robot's subsystems and commands are defined here...
   DriveSubsystem m_drive;
   frc2::Command* m_autonomousCommand = nullptr;
@@ -60,4 +62,11 @@ class RobotContainer
   void PrintPOVRight() { printf("POV Right button\n"); }
   void PrintPOVUp() { printf("POV Up button\n"); }
 #endif
+  // No weight
+  //double m_pitchFactor = -0.0125;
+  //double m_MaxAutoBalanceSpeed = 0.1;
+
+  // About 108 lbs
+  double m_pitchFactor = -0.0125;
+  double m_maxAutoBalanceSpeed = 0.2;
 };

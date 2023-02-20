@@ -11,13 +11,15 @@
 #include <frc2/command/WaitCommand.h>
 #include <frc2/command/WaitUntilCommand.h>
 
+#include <frc/smartdashboard/SmartDashboard.h>
+
 RobotContainer::RobotContainer() 
 {
   // Initialize all of your commands and subsystems here
   std::vector<frc::Pose2d> testTrajectory
   {
     frc::Pose2d(0_in, 0_in, frc::Rotation2d(0_deg)),
-    frc::Pose2d(12_in, 0_in, frc::Rotation2d(0_deg))
+    frc::Pose2d(48_in, 0_in, frc::Rotation2d(0_deg))
   };
 
   auto config = frc::TrajectoryConfig(units::meters_per_second_t{1.0}, units::meters_per_second_squared_t{1.0});
@@ -27,10 +29,15 @@ RobotContainer::RobotContainer()
 
   // Configure the button bindings
   ConfigureButtonBindings();
+
+  frc::SmartDashboard::PutNumber("pitchFactor", m_pitchFactor);
+  frc::SmartDashboard::PutNumber("maxAutoBalanceSpeed", m_maxAutoBalanceSpeed);
 }
 
 void RobotContainer::Periodic()
 {
+  frc::SmartDashboard::GetNumber("pitchFactor", m_pitchFactor);
+  frc::SmartDashboard::GetNumber("maxAutoBalanceSpeed", m_maxAutoBalanceSpeed);
 }
 
 void RobotContainer::ConfigureButtonBindings()
@@ -109,7 +116,7 @@ frc2::RamseteCommand RobotContainer::GetCommandPath()
     , [this]() { return m_drive.GetPose(); }                                                      // std::function<frc::Pose2d ()>
     , m_ramseteController                                                                         // frc::RamseteController
     , m_drive.GetDriveKinematics()                                                                // frc::DifferentialDriveKinematics
-    , [this](auto leftSpeed, auto rightSpeed) { m_drive.SetWheelSpeeds(leftSpeed, rightSpeed); }  // std::function<void (units::velocity::meters_per_second_t, units::velocity::meters_per_second_t)>
+    , [this](auto leftSpeed, auto rightSpeed) { m_drive.SetWheelSpeeds(-leftSpeed, -rightSpeed); }  // std::function<void (units::velocity::meters_per_second_t, units::velocity::meters_per_second_t)>
     , {&m_drive}                                                                                  // std::initializer_list
   );
   return ramseteCommand;
@@ -140,8 +147,7 @@ frc2::ConditionalCommand* RobotContainer::GetParkAndBalanceCommand()
         frc2::RunCommand([this]() { printf("stopping\n"); m_drive.Drive(0.0, 0.0, false); }, {&m_drive})    // Cmd if true
       , frc2::RunCommand([this]()                                                     // Cmd if false
         { 
-          //double driveSpeed = m_drive.GetPitch() < 0.0 ? 0.1 : -0.1;
-          double driveSpeed = std::clamp(-0.0125 * m_drive.GetPitch(), -0.1, 0.1);
+          double driveSpeed = std::clamp(m_pitchFactor * m_drive.GetPitch(), -m_maxAutoBalanceSpeed, m_maxAutoBalanceSpeed);
           printf("driving %.3f\n", driveSpeed); 
           m_drive.Drive(driveSpeed, 0.0, false); 
         }
