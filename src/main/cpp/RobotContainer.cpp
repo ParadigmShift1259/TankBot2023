@@ -10,8 +10,6 @@
 #include <frc2/command/ParallelDeadlineGroup.h>
 #include <frc2/command/WaitCommand.h>
 #include <frc2/command/WaitUntilCommand.h>
-#include <frc2/command/ScheduleCommand.h>
-#include <frc2/command/button/JoystickButton.h>
 
 RobotContainer::RobotContainer() 
 {
@@ -39,7 +37,6 @@ void RobotContainer::ConfigureButtonBindings()
 {
   using namespace frc;
   using namespace frc2;
-  using xbox = frc::XboxController::Button;
 
   m_drive.SetDefaultCommand(RunCommand(
     [this] {
@@ -56,18 +53,48 @@ void RobotContainer::ConfigureButtonBindings()
   ));
 
   auto& primary = m_primaryController;
-  JoystickButton(&primary, xbox::kB).OnTrue(GetParkCommand());
-//  JoystickButton(&primary, xbox::kY).WhileTrue(&m_setBalanceOn);
-//  JoystickButton(&primary, xbox::kY).WhileFalse(&m_setBalanceOff);
-  JoystickButton(&primary, xbox::kY).WhileTrue(GetParkAndBalanceCommand());
+#ifdef TEST_GP2040_BUTTON_BOX
+  // Raspberry PI Pico with gp2040 firmware Button Box
+  //
+  // Row	Black			    Blue			    Green				      Yellow				      Red
+  // 1	  Back			    Start			    Left Stick Button	Right Stick Button	Left Bumper
+  // 2	  Right Trigger	Left Trigger	X					        Y					          Right Bumper
+  // 3	  B				      A				      POV Left			    POV Right			      POV Up
+
+  primary.A().WhileTrue(PrintCommand("A button").ToPtr());                     // Blue   row 3
+  primary.B().WhileTrue(PrintCommand("B button").ToPtr());                     // Black  row 3
+  primary.X().WhileTrue(PrintCommand("X button").ToPtr());                     // Green  row 2
+  primary.Y().WhileTrue(PrintCommand("Y button").ToPtr());                     // Yellow row 2
+
+  primary.LeftBumper().WhileTrue(PrintCommand("Left bumper").ToPtr());         // Red    row 1
+  primary.RightBumper().WhileTrue(PrintCommand("Right bumper").ToPtr());       // Red    row 2
+  primary.Start().WhileTrue(PrintCommand("Start button").ToPtr());             // Blue   row 1
+  primary.Back().WhileTrue(PrintCommand("Back button").ToPtr());               // Black  row 1
+
+  primary.LeftStick().WhileTrue(PrintCommand("Left stick").ToPtr());           // Green  row 1
+  primary.RightStick().WhileTrue(PrintCommand("Right stick").ToPtr());         // Yellow row 1
+  primary.LeftTrigger().WhileTrue(PrintCommand("Left trigger").ToPtr());       // Blue   row 2
+  primary.RightTrigger().WhileTrue(PrintCommand("Right trigger").ToPtr());     // Black  row 2
+
+  auto loop = CommandScheduler::GetInstance().GetDefaultButtonLoop();
+  primary.POVLeft(loop).Rising().IfHigh([] { printf("POV Left button\n"); });  // Green  row 3
+  primary.POVRight(loop).Rising().IfHigh([this] { PrintPOVRight(); });         // Yellow row 3
+  primary.POVUp(loop).Rising().IfHigh([this] { PrintPOVUp(); });               // Red    row 3
+#else
+  primary.B().OnTrue(GetParkCommand());
+  //primary.Y().WhileTrue(&m_setBalanceOn);
+  //primary.Y().WhileFalse(&m_setBalanceOff);
+  primary.Y().WhileTrue(GetParkAndBalanceCommand());
+#endif
 }
 
-frc2::Command* RobotContainer::GetAutonomousCommand() {
-  // An example command will be run in autonomous
+frc2::Command* RobotContainer::GetAutonomousCommand()
+{
   return m_autonomousCommand;
 }
 
-frc2::SequentialCommandGroup* RobotContainer::GetCommandGroup() {
+frc2::SequentialCommandGroup* RobotContainer::GetCommandGroup()
+{
   return new frc2::SequentialCommandGroup
   (
       std::move(GetCommandPath())
@@ -75,7 +102,8 @@ frc2::SequentialCommandGroup* RobotContainer::GetCommandGroup() {
   );
 }
 
-frc2::RamseteCommand RobotContainer::GetCommandPath() {
+frc2::RamseteCommand RobotContainer::GetCommandPath()
+{
   frc2::RamseteCommand ramseteCommand(
       m_trajectory                                                                                // frc::Trajectory
     , [this]() { return m_drive.GetPose(); }                                                      // std::function<frc::Pose2d ()>

@@ -15,11 +15,11 @@
 #include <frc2/command/SequentialCommandGroup.h>
 #include <frc2/command/RunCommand.h>
 #include <frc2/command/ConditionalCommand.h>
+
 #include <vector>
 
-#include "commands/ExampleCommand.h"
 #include "subsystems/DriveSubsystem.h"
-#include <frc/XboxController.h>
+#include <frc2/command/button/CommandXboxController.h>
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -43,14 +43,21 @@ class RobotContainer
  private:
   // The robot's subsystems and commands are defined here...
   DriveSubsystem m_drive;
-  ExampleSubsystem m_Subsystem;
   frc2::Command* m_autonomousCommand = nullptr;
   frc::Trajectory m_trajectory;
   frc::RamseteController m_ramseteController;
 
-  frc::XboxController m_primaryController{0};
+  // Changed to CommandXboxController to support binding D-Pad/POV buttons
+  frc2::CommandXboxController m_primaryController{0};
   frc::SlewRateLimiter<units::scalar> m_xspeedLimiter{3 / 1_s};
   frc::SlewRateLimiter<units::scalar> m_rotLimiter{3 / 1_s};
 
   void ConfigureButtonBindings();
+
+//#define TEST_GP2040_BUTTON_BOX
+#ifdef TEST_GP2040_BUTTON_BOX
+  void PrintPOVLeft() { printf("POV Left button\n"); }
+  void PrintPOVRight() { printf("POV Right button\n"); }
+  void PrintPOVUp() { printf("POV Up button\n"); }
+#endif
 };

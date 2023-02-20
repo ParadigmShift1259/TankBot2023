@@ -8,7 +8,7 @@
 
 #include <ctre/phoenix.h>
 
-using namespace units;
+// When using namespace units is active, simulation fails due to a bug in the CTRE Phoenix library 
 
 class Gyro
 {
@@ -18,7 +18,7 @@ public:
     /// Returns the heading of the robot.
     /// \return the robot's heading in degrees, from -180 to 180
     double GetHeading();
-    frc::Rotation2d GetHeadingAsRot2d() { return frc::Rotation2d(degree_t(GetHeading())); }
+    frc::Rotation2d GetHeadingAsRot2d() { return frc::Rotation2d(units::degree_t(GetHeading())); }
     double GetPitch() { 
         // auto pitch = m_pigeon.GetPitch();
         // if (pitch > 0.5)
